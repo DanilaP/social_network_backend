@@ -3,11 +3,15 @@ import { broadcastMessage } from '../../websocket/websocket';
 import Dialogs from '../../models/dialogs/dialogs';
 import fsHelpers from '../../helpers/fs-helpers';
 import moment from 'moment';
+import userHelpers from '../../helpers/user-helpers';
 
 class ChatController {
     static async sendMessage(req: Request, res: Response) {
         try {
-            let { dialog_id, sender_id, opponent_id, text } = req.body;
+            const user = await userHelpers.getUserFromToken(req);
+            const sender_id = user?._id.toString();
+
+            let { dialog_id, opponent_id, text } = req.body;
             const message = {
                 date: moment(Date.now()).format('YYYY:MM:DD'),
                 sender_id,
