@@ -19,7 +19,8 @@ async function uploadFiles (files: any) {
             filelist = [...filelist, {
                 url: `${ process.env.HOST_URL }/files/${ uniqueFileStats }`,
                 name: fileName,
-                size: file.size
+                size: file.size,
+                type: file.mimetype
             }];
         });
         return { filelist, status: 200 };
