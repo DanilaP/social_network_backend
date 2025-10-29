@@ -6,6 +6,10 @@ const Post = new Schema(
             type: String, 
             required: true 
         },
+        date: {
+            type: String,
+            required: true
+        },
         text: {
             type: String,
             default: ""

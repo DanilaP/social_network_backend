@@ -4,6 +4,8 @@ import userHelpers from '../../helpers/user-helpers';
 import fsHelpers from '../../helpers/fs-helpers';
 import Post from '../../models/post/post';
 import User from '../../models/user/user';
+import moment from 'moment';
+moment.locale('ru');
 
 class PostsController {
     static async createPost(req: Request, res: Response) {
@@ -12,7 +14,8 @@ class PostsController {
             const post = new Post({ 
                 user_id: user?._id,
                 text: req.body.text,
-                files: req.files ? (await fsHelpers.uploadFiles(req.files)).filelist : []
+                files: req.files ? (await fsHelpers.uploadFiles(req.files)).filelist : [],
+                date: moment().format('DD MMMM YYYY HH:mm')
             });
             await post.save();
             await User.updateOne({ _id: user?._id }, { $push: { posts: post._id } });
