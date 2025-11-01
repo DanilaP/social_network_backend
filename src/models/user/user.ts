@@ -32,6 +32,10 @@ const User = new Schema(
             type: String,
             default: []
         }],
+        friendRequests: [{
+            type: String,
+            default: []
+        }],
         dialogs: [{
             type: String,
             default: []
