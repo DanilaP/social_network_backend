@@ -213,7 +213,7 @@ class FriendsController {
     static async getFriendRequests(req: Request, res: Response) {
         try {
             const user = await userHelpers.getUserFromToken(req);
-            const userFriendsInfo: { 
+            const userFriendRequestsInfo: { 
                 friendRequests: { 
                     _id: string, 
                     name: string, 
@@ -265,7 +265,7 @@ class FriendsController {
             ]);
             res.status(200).json({ 
                 message: "Успешное получение списка заявок в друзья", 
-                friendRequests: userFriendsInfo[0].friendRequests 
+                friendRequests: userFriendRequestsInfo[0].friendRequests 
             });
         }
         catch (error) {
