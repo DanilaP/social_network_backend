@@ -7,5 +7,6 @@ router.post('/delete-friend-request', FriendsController.deleteFriendRequest);
 router.delete('/', FriendsController.deleteFriend);
 router.post('/accept-friend-request', FriendsController.acceptFriendRequest);
 router.get('/', FriendsController.getFriendsList);
+router.get('/get-friend-requests', FriendsController.getFriendRequests);
 
 export default router;

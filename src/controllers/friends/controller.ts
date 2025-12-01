@@ -210,6 +210,69 @@ class FriendsController {
             console.log(error);
         }
     }
+    static async getFriendRequests(req: Request, res: Response) {
+        try {
+            const user = await userHelpers.getUserFromToken(req);
+            const userFriendsInfo: { 
+                friendRequests: { 
+                    _id: string, 
+                    name: string, 
+                    avatar: string 
+                }[] 
+            }[] = await User.aggregate([
+                {
+                    $match: {
+                        "_id": user?._id
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "users",
+                        let: { friendsRequestsIds: "$friendRequests" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $in: [
+                                            { $toString: "$_id" },
+                                            "$$friendsRequestsIds"
+                                        ] 
+                                    }
+                                }
+                            },
+                            {
+                                $project: {
+                                    _id: 1,
+                                    name: 1,
+                                    avatar: 1
+                                }
+                            }
+                        ],
+                        as: "friend_requests_data"
+                    }
+                },
+                {
+                    $addFields: {
+                        friendRequests: "$friend_requests_data"
+                    }
+                },
+                {
+                    $project: {
+                        _id: false,
+                        friendRequests: true
+                    }
+                }
+            ]);
+            res.status(200).json({ 
+                message: "Успешное получение списка заявок в друзья", 
+                friendRequests: userFriendsInfo[0].friendRequests 
+            });
+        }
+        catch (error) {
+            res.status(400).json({ message: "Ошибка получения списка заявок в друзья" });
+            console.log(error);
+        }
+    }
 }
 
 export default FriendsController;
