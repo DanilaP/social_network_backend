@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import userHelpers from '../../helpers/user-helpers';
 import Dialogs from '../../models/dialogs/dialogs';
-import User from '../../models/user/user';
 
 class DialogsController {
     static async getUserDialogs(req: Request, res: Response) {
