@@ -147,11 +147,9 @@ class PostsController {
             if (userId) {
                 const postsInfo = await Post.find({ user_id: userId });
                 const modifiedPostInfo = postsInfo.map(post => {
-                    const postCopy = post;
-                    return {
-                        ...postCopy,
-                        isPostLikedByUser: post.likes.includes(userId)
-                    }
+                    let postCopy = post as any;
+                    postCopy.isPostLikedByUser = post.likes.includes(userId);
+                    return postCopy;
                 })
                 res.status(200).json({ message: "Успешное получение информации о постах", posts: modifiedPostInfo });
                 return;
