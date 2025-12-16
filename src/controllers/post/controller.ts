@@ -54,7 +54,7 @@ class PostsController {
             const userId = (jwt.decode(req.cookies?.token) as JwtPayload).id.toString();
             const post = await Post.findOne({ _id: req.body.id }); 
             if (post) {
-                await Post.updateOne(
+                const updatedPost = await Post.findOneAndUpdate(
                     { _id: req.body.id }, 
                     [ 
                         {
@@ -68,9 +68,16 @@ class PostsController {
                                 }
                             }
                         }
-                    ]
+                    ],
+                    {
+                        returnDocument: "after"
+                    }
                 );
-                res.status(200).json({ message: "Информация о лайке изменена" });
+                res.status(200).json({ 
+                    message: "Информация о лайке изменена",
+                    likesNumber: updatedPost!.likes.length,
+                    isPostLikedByUser: updatedPost!.likes.includes(userId) 
+                });
             }
             else {
                 res.status(400).json({ message: "Пост не найден" });
