@@ -28,8 +28,13 @@ class PostsController {
     }
     static async deletePost(req: Request, res: Response) {
         try {
+            const userId = (jwt.decode(req.cookies?.token) as JwtPayload).id.toString();
             const post = await Post.findOne({ _id: req.query.id });
-            await Post.deleteOne({ _id: req.query.id });
+
+            await Promise.all([
+                Post.deleteOne({ _id: req.query.id }),
+                User.updateOne({ _id: userId }, { $pull: { posts: req.query.id } })
+            ]);
 
             const postFilesURLs = post?.files.map(file => {
                 return file.url.replace(process.env.HOST_URL, `./static`);
