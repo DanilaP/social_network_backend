@@ -143,8 +143,22 @@ class PostsController {
     }
     static async getUserPostsInfo(req: Request, res: Response) {
         try {
-            const postsInfo = await Post.find({ user_id: req.query.id });
-            res.status(200).json({ message: "Успешное получение информации о постах", posts: postsInfo });
+            const userId = req.query.id as string;
+            if (userId) {
+                const postsInfo = await Post.find({ user_id: userId });
+                const modifiedPostInfo = postsInfo.map(post => {
+                    return {
+                        ...post,
+                        isPostLikedByUser: post.likes.includes(userId)
+                    }
+                })
+                res.status(200).json({ message: "Успешное получение информации о постах", posts: modifiedPostInfo });
+                return;
+            }
+            else {
+                res.status(400).json({ message: "Пользователь не найден", posts: [] });
+                return;
+            }
         }
         catch (error) {
             res.status(400).json({ message: "Ошибка при получении информации о постах" });
