@@ -5,6 +5,7 @@ import fsHelpers from '../../helpers/fs-helpers';
 import Post from '../../models/post/post';
 import User from '../../models/user/user';
 import moment from 'moment';
+import post from '../../models/post/post';
 moment.locale('ru');
 
 class PostsController {
@@ -150,20 +151,62 @@ class PostsController {
         try {
             const userId = req.query.id as string;
             if (userId) {
-                const postsInfo = await Post.find({ user_id: userId });
+                const postsInfo = await Post.aggregate([
+                    {
+                        $match: {
+                            "user_id": userId
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "users",
+                            let: { userIds: "$likes" },
+                            pipeline: [
+                                {
+                                    $match: {
+                                        $expr: {
+                                            $in: [
+                                                { $toString: "$_id" },
+                                                "$$userIds"
+                                            ] 
+                                        }
+                                    }
+                                },
+                                {
+                                    $project: {
+                                        _id: 1,
+                                        name: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ],
+                            as: "user_likes_data"
+                        }
+                    },
+                    {
+                        $addFields: {
+                            likes: "$user_likes_data"
+                        }
+                    },
+                    {
+                        $project: {
+                            user_likes_data: 0
+                        }
+                    }
+                ]);
                 const modifiedPostInfo = postsInfo.map(post => {
-                    let postCopy = post.toObject() as any;
-                    postCopy.isPostLikedByUser = post.likes.includes(userId);
+                    let postCopy = post as any;
+                    postCopy.isPostLikedByUser = post.likes.find((like: any) => like._id.toString() === userId) ? true : false;
                     return postCopy;
                 })
                 res.status(200).json({ message: "Успешное получение информации о постах", posts: modifiedPostInfo });
                 return;
-            }
+            }          
             else {
                 res.status(400).json({ message: "Пользователь не найден", posts: [] });
                 return;
             }
-        }
+        }        
         catch (error) {
             res.status(400).json({ message: "Ошибка при получении информации о постах" });
             console.log(error);
