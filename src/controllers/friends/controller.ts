@@ -6,25 +6,45 @@ class FriendsController {
     static async sendFriendRequest(req: Request, res: Response) {
         try {
             const user = await userHelpers.getUserFromToken(req);
-            if (user) {
-                const modifiedUserInfo = await User.updateOne(
-                    { _id: req.body.id }, 
-                    { 
-                        $addToSet: { friendRequests: user._id }
+            if (user && !user.sendedFriendRequests.includes(req.body.id)) {
+                const modifiedUserInfo = await User.bulkWrite([
+                    {
+                        updateOne: {
+                            filter: { 
+                                _id: req.body.id 
+                            },
+                            update: {
+                                $addToSet: { 
+                                    friendRequests: user._id
+                                }
+                            }
+                        }
+                    },
+                    {
+                        updateOne: {
+                            filter: { 
+                                _id: user._id 
+                            },
+                            update: {
+                                $addToSet: { 
+                                    sendedFriendRequests: req.body.id
+                                }
+                            }
+                        }
                     }
-                );
+                ]);
                 if (modifiedUserInfo.matchedCount === 0) {
                     res.status(400).json({ message: "Пользователь не найден" });
-                    return;
-                }
-                else if (modifiedUserInfo.modifiedCount === 0) {
-                    res.status(400).json({ message: "Вы уже отправили заявку в друзья данному человеку" });
                     return;
                 }
                 else {
                     res.status(200).json({ message: "Заявка в друзья успешно отправлена" });
                     return;
                 }
+            }
+            else {
+                res.status(400).json({ message: "Вы уже отправили заявку в друзья данному человеку" });
+                return;
             }
         }
         catch (error) {

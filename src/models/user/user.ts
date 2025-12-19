@@ -36,6 +36,10 @@ const User = new Schema(
             type: String,
             default: []
         }],
+        sendedFriendRequests: [{
+            type: String,
+            default: []
+        }],
         dialogs: [{
             type: String,
             default: []
