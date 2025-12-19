@@ -56,12 +56,43 @@ class FriendsController {
         try {
             const user = await userHelpers.getUserFromToken(req);
             if (user) {
+                /*
                 const modifiedUserInfo = await User.updateOne(
                     { _id: req.body.id }, 
                     { 
-                        $pull: { friendRequests: user._id }
+                        $pull: { 
+                            friendRequests: user._id,
+                            sendedFriendRequests: user._id  
+                        }
                     }
                 );
+                */
+                const modifiedUserInfo = await User.bulkWrite([
+                    {
+                        updateOne: {
+                            filter: { 
+                                _id: req.body.id 
+                            },
+                            update: {
+                                $pull: { 
+                                    friendRequests: user._id
+                                }
+                            }
+                        }
+                    },
+                    {
+                        updateOne: {
+                            filter: { 
+                                _id: user._id 
+                            },
+                            update: {
+                                $pull: { 
+                                    sendedFriendRequests: req.body.id
+                                }
+                            }
+                        }
+                    }
+                ]);
                 if (modifiedUserInfo.matchedCount === 0) {
                     res.status(400).json({ message: "Пользователь не найден" });
                     return;
@@ -77,7 +108,7 @@ class FriendsController {
             }
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при добавлении друга" });
+            res.status(400).json({ message: "Ошибка при удалении заявки в друзья" });
             console.log(error);
         }
     }
