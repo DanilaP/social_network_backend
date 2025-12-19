@@ -159,7 +159,10 @@ class FriendsController {
                             },
                             update: {
                                 $addToSet: { friends: user._id }, 
-                                $pull: { friendRequests: user._id }
+                                $pull: { 
+                                    friendRequests: user._id,
+                                    sendedFriendRequests: user._id 
+                                }
                             }
                         }
                     },
@@ -170,7 +173,10 @@ class FriendsController {
                             },
                             update: {
                                 $addToSet: { friends: req.body.id },
-                                $pull: { friendRequests: req.body.id }
+                                $pull: { 
+                                    friendRequests: req.body.id,
+                                    sendedFriendRequests: req.body.id
+                                }
                             }
                         }
                     }
