@@ -56,17 +56,6 @@ class FriendsController {
         try {
             const user = await userHelpers.getUserFromToken(req);
             if (user) {
-                /*
-                const modifiedUserInfo = await User.updateOne(
-                    { _id: req.body.id }, 
-                    { 
-                        $pull: { 
-                            friendRequests: user._id,
-                            sendedFriendRequests: user._id  
-                        }
-                    }
-                );
-                */
                 const modifiedUserInfo = await User.bulkWrite([
                     {
                         updateOne: {
