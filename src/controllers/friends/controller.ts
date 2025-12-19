@@ -64,7 +64,8 @@ class FriendsController {
                             },
                             update: {
                                 $pull: { 
-                                    friendRequests: user._id
+                                    friendRequests: user._id,
+                                    sendedFriendRequests: user._id
                                 }
                             }
                         }
@@ -76,6 +77,7 @@ class FriendsController {
                             },
                             update: {
                                 $pull: { 
+                                    friendRequests: req.body.id,
                                     sendedFriendRequests: req.body.id
                                 }
                             }
