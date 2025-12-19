@@ -111,7 +111,7 @@ class FriendsController {
                     {
                         updateOne: {
                             filter: { 
-                                _id: req.body.id 
+                                _id: req.query.id 
                             },
                             update: {
                                 $pull: { friends: user._id }
@@ -124,7 +124,7 @@ class FriendsController {
                                 _id: user._id 
                             },
                             update: {
-                                $pull: { friends: req.body.id }
+                                $pull: { friends: req.query.id }
                             }
                         }
                     }
