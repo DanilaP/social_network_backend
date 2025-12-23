@@ -9,8 +9,8 @@ import AuthMiddleware from './src/middlewares/auth-middleware';
 import AuthRouter from './src/controllers/auth/router'; 
 import UserRouter from './src/controllers/user/router';
 import UsersRouter from './src/controllers/users/router';
-import PostRouter from './src/controllers/post/router';
-import ChatRouter from './src/controllers/chat/router';
+import PostRouter from './src/controllers/posts/router';
+import ChatRouter from './src/controllers/chats/router';
 import DialogsRouter from './src/controllers/dialogs/router';
 import FriendsRouter from './src/controllers/friends/router';
 
