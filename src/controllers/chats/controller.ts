@@ -61,7 +61,7 @@ class ChatController {
             const dialog = await Dialogs.findOne({ _id: dialog_id });
             if (dialog) {
                 broadcastMessage(dialog.members, {
-                    type: 'new_message',
+                    type: 'delete_message',
                     dialog_id: dialog_id,
                     messages: dialog.messages
                 });

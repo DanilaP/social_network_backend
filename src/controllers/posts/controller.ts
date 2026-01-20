@@ -6,6 +6,8 @@ import Post from '../../models/post/post';
 import User from '../../models/user/user';
 import moment from 'moment';
 import post from '../../models/post/post';
+import mongoose from 'mongoose';
+
 moment.locale('ru');
 
 class PostsController {
@@ -144,6 +146,82 @@ class PostsController {
         }
         catch (error) {
             res.status(400).json({ message: "Ошибка при удалении комментария" });
+            console.log(error);
+        }
+    }
+    static async likeComment(req: Request, res: Response) {
+        try {
+            const userId = (jwt.decode(req.cookies?.token) as JwtPayload).id.toString();
+            const commentId = new mongoose.Types.ObjectId(req.body.comment_id);
+            const post = await Post.findOne({ _id: req.body.id }); 
+            
+            if (post) {
+                const updatedPost = await Post.findOneAndUpdate(
+                    { _id: req.body.id }, 
+                    [
+                        {
+                            $set: {
+                                comments: {
+                                    $map: {
+                                        input: "$comments",
+                                        as: "comment",
+                                        in: {
+                                            $cond: {
+                                                if: { $eq: ["$$comment._id", commentId] },
+                                                then: {
+                                                    $mergeObjects: [
+                                                        "$$comment",
+                                                        {
+                                                            likes: {
+                                                                $cond: {
+                                                                    if: { $in: [userId, "$$comment.likes"] },
+                                                                    then: { 
+                                                                        $filter: { 
+                                                                            input: "$$comment.likes", 
+                                                                            cond: { $ne: ["$$this", userId] } 
+                                                                        } 
+                                                                    },
+                                                                    else: { $concatArrays: ["$$comment.likes", [userId]] }
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                else: "$$comment"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    {
+                        returnDocument: "after"
+                    }
+                );
+
+                let likesNumber = 0;
+                let isCommentLikedByUser = false;
+
+                updatedPost?.comments.map((comment: any) => {
+                    if (comment._id.toString() === commentId.toString()) {
+                        likesNumber = comment.likes.length;
+                        isCommentLikedByUser = comment.likes.includes(userId)
+                    }
+                });
+
+                res.status(200).json({ 
+                    message: "Информация о лайке изменена",
+                    likesNumber: likesNumber,
+                    isCommentLikedByUser: isCommentLikedByUser 
+                });
+            }
+            else {
+                res.status(400).json({ message: "Пост или комментарий не найден" });
+            }
+        }
+        catch (error) {
+            res.status(400).json({ message: "Ошибка при изменении информации о посте" });
             console.log(error);
         }
     }
