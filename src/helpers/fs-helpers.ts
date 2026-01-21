@@ -1,9 +1,16 @@
 import fs from 'fs';
 
+interface IFile {
+    url: string,
+    name: string,
+    size: number,
+    type: string
+}
+
 async function uploadFiles (files: any) {
     if (files && Object.keys(files).length !== 0) {
         const uploadedFiles = files.files.length > 0 ? files.files : [files.files];
-        let filelist: any[] = [];
+        let filelist: IFile[] = [];
 
         await uploadedFiles.map((file: any) => {
             const fileName = Buffer.from(file.name, 'latin1').toString('utf8');
