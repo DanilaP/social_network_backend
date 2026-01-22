@@ -5,6 +5,7 @@ import fsHelpers from '../../helpers/fs-helpers';
 import moment from 'moment';
 import userHelpers from '../../helpers/user-helpers';
 import mongoose from 'mongoose';
+import User from '../../models/user/user';
 
 const { ObjectId } = mongoose.Types;
 
@@ -13,16 +14,17 @@ class ChatController {
         try {
             const user = await userHelpers.getUserFromToken(req);
             const sender_id = user?._id.toString();
-
             let { dialog_id, opponent_id, text } = req.body;
+
             const message = {
                 date: moment(Date.now()).format('YYYY:MM:DD'),
                 sender_id,
                 text,
                 files: req.files ? (await fsHelpers.uploadFiles(req.files)).filelist : []
             }
+
             if (dialog_id) {
-                await Dialogs.updateOne({ _id: dialog_id }, { $push: { messages: message } });
+                await Dialogs.updateOne({ _id: new ObjectId(dialog_id) }, { $push: { messages: message } });
             }
             else {
                 const dialog = new Dialogs({
@@ -30,7 +32,30 @@ class ChatController {
                     messages: [message]
                 });
                 dialog_id = dialog._id;
-                dialog.save();
+
+                await User.bulkWrite([
+                    {
+                        updateOne: {
+                            filter: { 
+                                _id: new ObjectId(sender_id)
+                            },
+                            update: {
+                                $addToSet: { dialogs: dialog_id }
+                            }
+                        }
+                    },
+                    {
+                        updateOne: {
+                            filter: { 
+                                _id: new ObjectId(opponent_id) 
+                            },
+                            update: {
+                                $addToSet: { dialogs: dialog_id }
+                            }
+                        }
+                    }
+                ]);
+                await dialog.save();
             }
 
             broadcastMessage([opponent_id], {
