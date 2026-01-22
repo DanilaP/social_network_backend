@@ -4,6 +4,9 @@ import Dialogs from '../../models/dialogs/dialogs';
 import fsHelpers from '../../helpers/fs-helpers';
 import moment from 'moment';
 import userHelpers from '../../helpers/user-helpers';
+import mongoose from 'mongoose';
+
+const { ObjectId } = mongoose.Types;
 
 class ChatController {
     static async sendMessage(req: Request, res: Response) {
@@ -71,6 +74,61 @@ class ChatController {
         }
         catch (error) {
             res.status(400).json({ message: "Ошибка при удалении сообщения" });
+            console.log(error);
+        }
+    }
+    static async changeMessage(req: Request, res: Response) {
+        try {
+            const { dialog_id, message_id, text } = req.body;
+            const updatedDialog = await Dialogs.findOneAndUpdate(
+                { 
+                    _id: new ObjectId(dialog_id) 
+                },
+                [
+                    {
+                        $set: {
+                            messages: {
+                                $map: {
+                                    input: "$messages",
+                                    as: "message",
+                                    in: {
+                                        $cond: {
+                                            if: { $eq: ["$$message._id", new ObjectId(message_id)] },
+                                            then: {
+                                                $mergeObjects: [
+                                                    "$$message",
+                                                    {
+                                                        text: text
+                                                    }
+                                                ]
+                                            },
+                                            else: "$$message"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                {
+                    returnDocument: 'after'
+                }
+            );
+            if (!updatedDialog) {
+                res.status(400).json({ message: "Диалог или сообщение не существует" });
+                return;
+            }
+            else {
+                broadcastMessage(updatedDialog.members, {
+                    type: 'edit_message',
+                    dialog_id: dialog_id,
+                    messages: updatedDialog.messages
+                });
+                res.status(200).json({ message: "Сообщение успешно изменено" });
+            }
+        }
+        catch (error) {
+            res.status(400).json({ message: "Ошибка при изменении сообщения" });
             console.log(error);
         }
     }
