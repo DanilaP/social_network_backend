@@ -11,7 +11,27 @@ const Dialogs = new Schema(
             type: {
                 date: String,
                 text: String,
-                files: Array,
+                files: [{
+                    type: {
+                        url: {
+                            type: String,
+                            required: true
+                        },
+                        name: {
+                            type: String,
+                            required: true
+                        },
+                        size: {
+                            type: Number,
+                            required: true
+                        },
+                        fileType: {
+                            type: String,
+                            required: true
+                        },
+                    },
+                    default: []
+                }],
                 sender_id: String
             },
             default: [],

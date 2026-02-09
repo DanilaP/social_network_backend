@@ -4,7 +4,7 @@ interface IFile {
     url: string,
     name: string,
     size: number,
-    type: string
+    fileType: string
 }
 
 async function uploadFiles (files: any) {
@@ -27,7 +27,7 @@ async function uploadFiles (files: any) {
                 url: `${ process.env.HOST_URL }/files/${ uniqueFileStats }`,
                 name: fileName,
                 size: file.size,
-                type: file.mimetype
+                fileType: file.mimetype
             }];
         });
         return { filelist, status: 200 };

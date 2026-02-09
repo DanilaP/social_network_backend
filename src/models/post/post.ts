@@ -14,10 +14,27 @@ const Post = new Schema(
             type: String,
             default: ""
         },
-        files: {
-            type: Array,
+        files: [{
+            type: {
+                url: {
+                    type: String,
+                    required: true
+                },
+                name: {
+                    type: String,
+                    required: true
+                },
+                size: {
+                    type: Number,
+                    required: true
+                },
+                fileType: {
+                    type: String,
+                    required: true
+                },
+            },
             default: []
-        },
+        }],
         likes: [{
             type: String,
             default: 0
@@ -26,7 +43,27 @@ const Post = new Schema(
             type: {
                 user_id: String,
                 text: String,
-                files: Array,
+                files: [{
+                    type: {
+                        url: {
+                            type: String,
+                            required: true
+                        },
+                        name: {
+                            type: String,
+                            required: true
+                        },
+                        size: {
+                            type: Number,
+                            required: true
+                        },
+                        fileType: {
+                            type: String,
+                            required: true
+                        },
+                    },
+                    default: []
+                }],
                 likes: Array
             },
             default: []

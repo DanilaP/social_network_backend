@@ -5,7 +5,6 @@ import fsHelpers from '../../helpers/fs-helpers';
 import Post from '../../models/post/post';
 import User from '../../models/user/user';
 import moment from 'moment';
-import post from '../../models/post/post';
 import mongoose from 'mongoose';
 
 moment.locale('ru');
@@ -39,7 +38,7 @@ class PostsController {
                 User.updateOne({ _id: userId }, { $pull: { posts: req.query.id } })
             ]);
 
-            const postFilesURLs = post?.files.map(file => {
+            const postFilesURLs = post?.files.map((file: any) => {
                 return file.url.replace(process.env.HOST_URL, `./static`);
             }) as string[];
 
