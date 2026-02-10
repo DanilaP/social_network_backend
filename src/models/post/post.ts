@@ -37,7 +37,7 @@ const Post = new Schema(
         }],
         likes: [{
             type: String,
-            default: 0
+            default: []
         }],
         comments: [{
             type: {
@@ -64,7 +64,10 @@ const Post = new Schema(
                     },
                     default: []
                 }],
-                likes: Array
+                likes: [{
+                    type: String,
+                    default: []
+                }]
             },
             default: []
         }],
