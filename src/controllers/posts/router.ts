@@ -9,5 +9,6 @@ router.post('/comment', PostsController.addComment);
 router.post('/comment/like', PostsController.likeComment);
 router.delete('/comment', PostsController.deleteComment);
 router.get('/', PostsController.getUserPostsInfo);
+router.get('/get-post-by-id', PostsController.getPostById);
 
 export default router;

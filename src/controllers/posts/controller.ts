@@ -289,6 +289,17 @@ class PostsController {
             console.log(error);
         }
     }
+    static async getPostById(req: Request, res: Response) {
+        try {
+            const postId = new mongoose.Types.ObjectId(req.query.id?.toString());
+            const post = await Post.findOne({ _id: postId });
+            res.status(200).json({ message: "Успешное получение данных поста", post: post });
+        }
+        catch (error) {
+            res.status(400).json({ message: "Ошибка при создании поста" });
+            console.log(error);
+        }
+    }
 }
 
 export default PostsController;
