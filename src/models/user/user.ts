@@ -40,6 +40,10 @@ const User = new Schema(
             type: String,
             default: []
         }],
+        sendedApplicationsToGroups: [{
+            type: String,
+            default: []
+        }],
         dialogs: [{
             type: String,
             default: []

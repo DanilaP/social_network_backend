@@ -4,7 +4,7 @@ const router = Router();
 
 router.post('/', GroupsController.createGroup);
 router.delete('/', GroupsController.deleteGroup);
-router.post('/join', GroupsController.joinGroup);
+router.post('/join', GroupsController.sendJoinRequest);
 router.post('/leave', GroupsController.leaveGroup);
 
 export default router;

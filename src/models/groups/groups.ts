@@ -1,16 +1,32 @@
 import { model, Schema } from 'mongoose';
 
-const Groups = new Schema(
+const Group = new Schema(
     {   
+        name: {
+            type: String,
+            required: true,
+            default: ""
+        },
         avatar: {
             type: String,
-            required: true
+            required: false,
+            default: ""
+        },
+        status: {
+            type: String,
+            required: true,
+            default: ""
         },
         admin: {
             type: String,
-            required: true
+            required: true,
+            default: ""
         },
         members: [{
+            type: String,
+            default: []
+        }],
+        joinRequests: [{
             type: String,
             default: []
         }],
@@ -85,4 +101,4 @@ const Groups = new Schema(
     }
 );
 
-export default model('Groups', Groups);
+export default model('Groups', Group);
