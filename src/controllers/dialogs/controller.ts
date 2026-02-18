@@ -51,10 +51,12 @@ class DialogsController {
             ]);
 
             res.status(200).json({ message: "Информация о диалогах успешно получена", dialogs });
+            return;
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка получения информации о диалогах" });
+            res.status(500).json({ message: "Ошибка получения информации о диалогах" });
             console.log(error);
+            return;
         }
     }
     static async deleteDialog(req: Request, res: Response) {
@@ -73,10 +75,12 @@ class DialogsController {
             }
 
             res.status(200).json({ message: "Диалог успешно удален" });
+            return;
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при удалении диалога" });
+            res.status(500).json({ message: "Ошибка при удалении диалога" });
             console.log(error);
+            return;
         }
     }
 }

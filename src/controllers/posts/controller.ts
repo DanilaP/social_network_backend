@@ -24,8 +24,9 @@ class PostsController {
             res.status(200).json({ message: "Успешное создание поста", post: post });
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при создании поста" });
+            res.status(500).json({ message: "Ошибка при создании поста" });
             console.log(error);
+            return;
         }
     }
     static async deletePost(req: Request, res: Response) {
@@ -46,14 +47,17 @@ class PostsController {
 
             if (result.status === 200) {
                 res.status(200).json({ message: "Успешное удаление поста" });
+                return;
             }
             else {
                 res.status(400).json({ message: "Ошибка при удалении файлов. Возможна потеря данных", post: post });
+                return;
             }
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при удалении поста" });
+            res.status(500).json({ message: "Ошибка при удалении поста" });
             console.log(error);
+            return;
         }
     }
     static async likePost(req: Request, res: Response) {
@@ -85,14 +89,17 @@ class PostsController {
                     likesNumber: updatedPost!.likes.length,
                     isPostLikedByUser: updatedPost!.likes.includes(userId) 
                 });
+                return;
             }
             else {
                 res.status(400).json({ message: "Пост не найден" });
+                return;
             }
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при изменении информации о посте" });
+            res.status(500).json({ message: "Ошибка при изменении информации о посте" });
             console.log(error);
+            return;
         }
     }
     static async addComment(req: Request, res: Response) {
@@ -113,14 +120,17 @@ class PostsController {
                 ];
                 await Post.updateOne({ _id: req.body.postId }, { $set: { comments: updatedComments } });
                 res.status(200).json({ message: "Комментарий успешно добавлен" });
+                return;
             }
             else {
                 res.status(400).json({ message: "Пост не найден" });
+                return;
             }
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при изменении информации о посте" });
+            res.status(500).json({ message: "Ошибка при изменении информации о посте" });
             console.log(error);
+            return;
         }
     }
     static async deleteComment(req: Request, res: Response) {
@@ -142,10 +152,12 @@ class PostsController {
                 }
             );
             res.status(200).json({ message: "Комментарий успешно удален" });
+            return;
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при удалении комментария" });
+            res.status(500).json({ message: "Ошибка при удалении комментария" });
             console.log(error);
+            return;
         }
     }
     static async likeComment(req: Request, res: Response) {
@@ -214,14 +226,17 @@ class PostsController {
                     likesNumber: likesNumber,
                     isCommentLikedByUser: isCommentLikedByUser 
                 });
+                return;
             }
             else {
                 res.status(400).json({ message: "Пост или комментарий не найден" });
+                return;
             }
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при изменении информации о посте" });
+            res.status(500).json({ message: "Ошибка при изменении информации о посте" });
             console.log(error);
+            return;
         }
     }
     static async getUserPostsInfo(req: Request, res: Response) {
@@ -285,8 +300,9 @@ class PostsController {
             }
         }        
         catch (error) {
-            res.status(400).json({ message: "Ошибка при получении информации о постах" });
+            res.status(500).json({ message: "Ошибка при получении информации о постах" });
             console.log(error);
+            return;
         }
     }
     static async getPostById(req: Request, res: Response) {
@@ -294,10 +310,12 @@ class PostsController {
             const postId = new mongoose.Types.ObjectId(req.query.id?.toString());
             const post = await Post.findOne({ _id: postId });
             res.status(200).json({ message: "Успешное получение данных поста", post: post });
+            return;
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при создании поста" });
+            res.status(500).json({ message: "Ошибка при создании поста" });
             console.log(error);
+            return;
         }
     }
 }

@@ -48,8 +48,9 @@ class FriendsController {
             }
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при добавлении друга" });
+            res.status(500).json({ message: "Ошибка при добавлении друга" });
             console.log(error);
+            return;
         }
     }
     static async deleteFriendRequest(req: Request, res: Response) {
@@ -99,8 +100,9 @@ class FriendsController {
             }
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при удалении заявки в друзья" });
+            res.status(500).json({ message: "Ошибка при удалении заявки в друзья" });
             console.log(error);
+            return;
         }
     }
     static async deleteFriend(req: Request, res: Response) {
@@ -140,8 +142,9 @@ class FriendsController {
             }
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при удалении друга" });
+            res.status(500).json({ message: "Ошибка при удалении друга" });
             console.log(error);
+            return;
         }
     }
     static async acceptFriendRequest(req: Request, res: Response) {
@@ -194,8 +197,9 @@ class FriendsController {
             }
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка принятия заявки в друзья" });
+            res.status(500).json({ message: "Ошибка принятия заявки в друзья" });
             console.log(error);
+            return;
         }
     }
     static async getFriendsList(req: Request, res: Response) {
@@ -252,10 +256,12 @@ class FriendsController {
                 }
             ]);
             res.status(200).json({ message: "Успешное получение списка друзей", friends: userFriendsInfo[0].friends });
+            return;
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка получения списка друзей" });
+            res.status(500).json({ message: "Ошибка получения списка друзей" });
             console.log(error);
+            return;
         }
     }
     static async getFriendRequests(req: Request, res: Response) {
@@ -315,10 +321,12 @@ class FriendsController {
                 message: "Успешное получение списка заявок в друзья", 
                 friendRequests: userFriendRequestsInfo[0].friendRequests 
             });
+            return;
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка получения списка заявок в друзья" });
+            res.status(500).json({ message: "Ошибка получения списка заявок в друзья" });
             console.log(error);
+            return;
         }
     }
 }

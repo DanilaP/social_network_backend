@@ -65,10 +65,12 @@ class ChatController {
             });
 
             res.status(200).json({ message: "Сообщение успешно отправлено", messageInfo: message });
+            return;
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при отправке сообщения" });
+            res.status(500).json({ message: "Ошибка при отправке сообщения" });
             console.log(error);
+            return;
         }
     }
     static async deleteMessage(req: Request, res: Response) {
@@ -96,10 +98,12 @@ class ChatController {
             }
 
             res.status(200).json({ message: "Сообщение успешно удалено" });
+            return;
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при удалении сообщения" });
+            res.status(500).json({ message: "Ошибка при удалении сообщения" });
             console.log(error);
+            return;
         }
     }
     static async changeMessage(req: Request, res: Response) {
@@ -150,11 +154,13 @@ class ChatController {
                     messages: updatedDialog.messages
                 });
                 res.status(200).json({ message: "Сообщение успешно изменено" });
+                return;
             }
         }
         catch (error) {
-            res.status(400).json({ message: "Ошибка при изменении сообщения" });
+            res.status(500).json({ message: "Ошибка при изменении сообщения" });
             console.log(error);
+            return;
         }
     }
 }
