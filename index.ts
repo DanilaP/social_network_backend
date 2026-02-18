@@ -13,6 +13,7 @@ import PostRouter from './src/controllers/posts/router';
 import ChatRouter from './src/controllers/chats/router';
 import DialogsRouter from './src/controllers/dialogs/router';
 import FriendsRouter from './src/controllers/friends/router';
+import GroupsRouter from './src/controllers/groups/router';
 
 require('dotenv').config();
 
@@ -42,6 +43,7 @@ app.use('/users', UsersRouter);
 app.use('/chat', ChatRouter);
 app.use('/dialogs', DialogsRouter);
 app.use('/friends', FriendsRouter);
+app.use('/groups', GroupsRouter);
 
 initWebSocket(server);
 
