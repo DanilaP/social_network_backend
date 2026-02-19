@@ -21,7 +21,7 @@ class GroupsController {
                 return;
             }
             else {
-                res.status(400).json({ message: "Ошибка создания группы. Имя и описание группы не могуит быть пустыми" });
+                res.status(400).json({ message: "Ошибка создания группы. Имя и описание группы не могут быть пустыми" });
                 return;
             }
         }
@@ -156,7 +156,11 @@ class GroupsController {
             if (group && user) {
                 if (group.admin === user._id.toString()) {
                     const updatedGroup = await Group.findOneAndUpdate(
-                        { _id: group._id, admin: user._id.toString() },
+                        { 
+                            _id: group._id, 
+                            admin: user._id.toString(),
+                            joinRequests: requestId 
+                        },
                         {
                             $pull: { joinRequests: requestId },
                             $push: { members: requestId }
