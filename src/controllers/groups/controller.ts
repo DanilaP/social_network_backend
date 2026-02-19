@@ -147,6 +147,49 @@ class GroupsController {
             return;
         }
     }
+    static async acceptJoinRequest(req: Request, res: Response) {
+        try {
+            const { id, requestId } = req.body;
+            const user = await userHelpers.getUserFromToken(req);
+            const group = await Group.findOne({ _id: new mongoose.Types.ObjectId(id) });
+
+            if (group && user) {
+                if (group.admin === user._id.toString()) {
+                    const updatedGroup = await Group.findOneAndUpdate(
+                        { _id: group._id, admin: user._id.toString() },
+                        {
+                            $pull: { joinRequests: requestId },
+                            $push: { members: requestId }
+                        },
+                        {
+                            returnDocument: "after"
+                        }
+                    );
+                    if (!updatedGroup) {
+                        res.status(400).json({ message: "Группа не найдена" });
+                        return;
+                    }
+                    else {
+                        res.status(200).json({ message: "Заявка в группа успешно принята" });
+                        return;
+                    }
+                }
+                else {
+                    res.status(400).json({ message: "Вы не являетесь администратором данной группы" });
+                    return;
+                }
+            }
+            else {
+                res.status(400).json({ message: "Группа или пользователь не найдены" });
+                return;
+            }
+        }
+        catch (error) {
+            res.status(500).json({ message: "Ошибка при принятии заявки в группу" });
+            console.log(error);
+            return;
+        }
+    }
     static async leaveGroup(req: Request, res: Response) {
         try {
             const user = await userHelpers.getUserFromToken(req);
