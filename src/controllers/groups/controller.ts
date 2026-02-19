@@ -148,6 +148,9 @@ class GroupsController {
         }
     }
     static async acceptJoinRequest(req: Request, res: Response) {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
         try {
             const { id, requestId } = req.body;
             const user = await userHelpers.getUserFromToken(req);
@@ -170,12 +173,37 @@ class GroupsController {
                         }
                     );
                     if (!updatedGroup) {
+                        await session.abortTransaction();
+                        session.endSession();
+
                         res.status(400).json({ message: "Группа не найдена" });
                         return;
                     }
                     else {
-                        res.status(200).json({ message: "Заявка в группа успешно принята" });
-                        return;
+                        const updatedUser = await User.findOneAndUpdate(
+                            { _id: user._id },
+                            {
+                                $pull: { sendedApplicationsToGroups: id },
+                            },
+                            {
+                                returnDocument: "after",
+                                session
+                            }
+                        );
+
+                        if (!updatedUser) {
+                            await session.abortTransaction();
+                            session.endSession();
+                            res.status(400).json({ message: "Заявка не найдена" });
+                            return;
+                        }
+                        else {
+                            await session.commitTransaction();
+                            session.endSession();
+
+                            res.status(200).json({ message: "Заявка в группа успешно принята" });
+                            return;
+                        }
                     }
                 }
                 else {
@@ -189,6 +217,9 @@ class GroupsController {
             }
         }
         catch (error) {
+            await session.abortTransaction();
+            session.endSession();
+
             res.status(500).json({ message: "Ошибка при принятии заявки в группу" });
             console.log(error);
             return;
