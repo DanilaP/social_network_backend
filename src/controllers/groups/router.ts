@@ -11,5 +11,6 @@ router.post('/kick-user-from-group', GroupsController.kickOutUserFromGroup);
 router.post('/create-post', GroupsController.createPost);
 router.post('/delete-post', GroupsController.deletePost);
 router.post('/like-post', GroupsController.likePost);
+router.post('/post/comment', GroupsController.addCommentToPost);
 
 export default router;

@@ -462,6 +462,79 @@ class GroupsController {
             return;
         }
     }
+    static async addCommentToPost(req: Request, res: Response) {
+        try {
+            const userId = (jwt.decode(req.cookies?.token) as JwtPayload).id.toString();
+            const { groupId, postId, text } = req.body;
+
+            if (groupId && postId && text) {
+                const modifiedGroupId = new mongoose.Types.ObjectId(groupId);
+                const modifiedPostId = new mongoose.Types.ObjectId(postId); 
+
+                const comment = {
+                    userId: userId,
+                    text: text,
+                    files: req.files ? (await fsHelpers.uploadFiles(req.files)).filelist : [],
+                    likes: [],
+                };
+
+                const updatedGroup = await Group.findOneAndUpdate(
+                    { 
+                        _id: modifiedGroupId, 'posts._id': modifiedPostId
+                    },
+                    [
+                        {
+                            $set: {
+                                posts: {
+                                    $map: {
+                                        input: "$posts",
+                                        as: "post",
+                                        in: {
+                                            $cond: {
+                                                if: { $eq: ["$$post._id", modifiedPostId] },
+                                                then: {
+                                                    $mergeObjects: [
+                                                        "$$post",
+                                                        {
+                                                            comments: {
+                                                                $concatArrays: ["$$post.comments", [comment]]
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                else: "$$post"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    {
+                        returnDocument: "after"
+                    }
+                );
+
+                if (!updatedGroup) {
+                    res.status(400).json({ message: "Группа или пост не найдены" });
+                    return;
+                }
+                else {
+                    res.status(200).json({ message: "Комментарий успешно создан", updatedGroup });
+                    return;
+                }
+            }
+            else {
+                res.status(400).json({ message: "Ошибка при создании комментария к посту" });
+                return;
+            }
+        }
+        catch (error) {
+            res.status(500).json({ message: "Ошибка при создании комментария к посту" });
+            console.log(error);
+            return;
+        }
+    }
 }
 
 export default GroupsController;
