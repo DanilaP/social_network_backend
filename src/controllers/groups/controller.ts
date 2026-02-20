@@ -340,6 +340,54 @@ class GroupsController {
             return;
         }
     }
+    static async deletePost(req: Request, res: Response) {
+        try {
+            const user = await userHelpers.getUserFromToken(req);
+            const userId = user?._id.toString();
+            const { postId, groupId } = req.body;
+
+            if (postId) {
+                const modifiedGroupId = groupId;
+                const modifiedPostId = postId;
+
+                const updatedGroup = await Group.findOneAndUpdate(
+                    { 
+                        _id: modifiedGroupId, 
+                        admin: userId, 
+                        'posts._id': modifiedPostId 
+                    },
+                    { 
+                        $pull: { 
+                            posts: {
+                                _id: new modifiedPostId
+                            }
+                        } 
+                    },
+                    {
+                        returnDocument: "after"
+                    }
+                );
+                
+                if (!updatedGroup) {
+                    res.status(400).json({ message: "Ошибка при удалении поста в группе" });
+                    return;
+                }
+                else {
+                    res.status(200).json({ message: "Вы успешно удалили пост из группы" });
+                    return;
+                }
+            }
+            else {
+                res.status(400).json({ message: "ID поста и ID группы не могут быть пустыми" });
+                return;
+            }
+        }
+        catch (error) {
+            res.status(500).json({ message: "Ошибка при удалении поста в группе" });
+            console.log(error);
+            return;
+        }
+    }
 }
 
 export default GroupsController;
