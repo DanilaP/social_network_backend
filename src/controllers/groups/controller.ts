@@ -535,6 +535,79 @@ class GroupsController {
             return;
         }
     }
+    static async deleteComment(req: Request, res: Response) {
+        try {
+            const userId = (jwt.decode(req.cookies?.token) as JwtPayload).id.toString();
+            const { groupId, postId, commentId } = req.body;
+
+            if (groupId && postId && commentId) {
+                const modifiedGroupId = new mongoose.Types.ObjectId(groupId);
+                const modifiedPostId = new mongoose.Types.ObjectId(postId);
+                const modifiedCommentId =  new mongoose.Types.ObjectId(commentId);
+
+                const updatedGroup = await Group.findOneAndUpdate(
+                    {
+                        _id: modifiedGroupId,
+                        admin: userId,
+                        "posts._id": modifiedPostId
+                    },
+                    [
+                        {
+                            $set: {
+                                posts: {
+                                    $map: {
+                                        input: "$posts",
+                                        as: "post",
+                                        in: {
+                                            $cond: {
+                                                if: { $eq: ["$$post._id", modifiedPostId] },
+                                                then: {
+                                                    $mergeObjects: [
+                                                        "$$post",
+                                                        {
+                                                            comments: {
+                                                                $filter: {
+                                                                    input: "$$post.comments",
+                                                                    as: "comment",
+                                                                    cond: { $ne: ["$$comment._id", modifiedCommentId] }
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                else: "$$post"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    {
+                        returnDocument: "after"
+                    }
+                );
+
+                if (!updatedGroup) {
+                    res.status(400).json({ message: "Комментарий или группа не найдена" });
+                    return;
+                }
+                else {
+                    res.status(200).json({ message: "Комментарий успешно удален" });
+                    return;
+                }
+            }
+            else {
+                res.status(400).json({ message: "ID группы, поста и комментария не должны быть пустыми" });
+                return;
+            }
+        }   
+        catch (error) {
+            res.status(500).json({ message: "Ошибка при удалении комментария под постом" });
+            console.log(error);
+            return;
+        }
+    }
 }
 
 export default GroupsController;
