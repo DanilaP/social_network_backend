@@ -10,5 +10,6 @@ router.post('/accept-join-request', GroupsController.acceptJoinRequest);
 router.post('/kick-user-from-group', GroupsController.kickOutUserFromGroup);
 router.post('/create-post', GroupsController.createPost);
 router.post('/delete-post', GroupsController.deletePost);
+router.post('/like-post', GroupsController.likePost);
 
 export default router;

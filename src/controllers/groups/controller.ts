@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import jwt, { JwtPayload } from "jsonwebtoken";
 import userHelpers from '../../helpers/user-helpers';
 import Group from '../../models/groups/groups';
 import User from '../../models/user/user';
@@ -359,7 +360,7 @@ class GroupsController {
                     { 
                         $pull: { 
                             posts: {
-                                _id: new modifiedPostId
+                                _id: modifiedPostId
                             }
                         } 
                     },
@@ -384,6 +385,79 @@ class GroupsController {
         }
         catch (error) {
             res.status(500).json({ message: "Ошибка при удалении поста в группе" });
+            console.log(error);
+            return;
+        }
+    }
+    static async likePost(req: Request, res: Response) {
+        try {
+            const userId = (jwt.decode(req.cookies?.token) as JwtPayload).id.toString();
+            const { groupId, postId } = req.body;
+
+            if (userId && postId && groupId) {
+                const modifiedGroupId = new mongoose.Types.ObjectId(groupId);
+                const modifiedPostId = new mongoose.Types.ObjectId(postId); 
+
+                const updatedGroup = await Group.findOneAndUpdate(
+                    { _id: modifiedGroupId, 'posts._id': modifiedPostId }, 
+                    [
+                        {
+                            $set: {
+                                posts: {
+                                    $map: {
+                                        input: "$posts",
+                                        as: "post",
+                                        in: {
+                                            $cond: {
+                                                if: { $eq: ["$$post._id", modifiedPostId] },
+                                                then: {
+                                                    $mergeObjects: [
+                                                        "$$post",
+                                                        {
+                                                            likes: {
+                                                                $cond: {
+                                                                    if: { $in: [userId, "$$post.likes"] },
+                                                                    then: { 
+                                                                        $filter: { 
+                                                                            input: "$$post.likes", 
+                                                                            cond: { $ne: ["$$this", userId] } 
+                                                                        } 
+                                                                    },
+                                                                    else: { $concatArrays: ["$$post.likes", [userId]] }
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                else: "$$post"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    {
+                        returnDocument: "after"
+                    }
+                );
+
+                if (!updatedGroup) {
+                    res.status(400).json({ message: "Группа или пост не найдены" });
+                    return;
+                }
+                else {
+                    res.status(200).json({ message: "Информация о посте успешно изменена" });
+                    return;
+                }
+            }
+            else {
+                res.status(400).json({ message: "Переданные данные не должны быть пустыми" });
+                return;
+            }
+        }
+        catch (error) {
+            res.status(500).json({ message: "Ошибка при изменении информации о посте" });
             console.log(error);
             return;
         }
