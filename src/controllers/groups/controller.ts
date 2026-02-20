@@ -3,6 +3,8 @@ import userHelpers from '../../helpers/user-helpers';
 import Group from '../../models/groups/groups';
 import User from '../../models/user/user';
 import mongoose from 'mongoose';
+import moment from 'moment';
+import fsHelpers from '../../helpers/fs-helpers';
 
 class GroupsController {
     static async createGroup(req: Request, res: Response) {
@@ -287,6 +289,53 @@ class GroupsController {
         }
         catch (error) {
             res.status(500).json({ message: "Ошибка при удалении пользователя из группы" });
+            console.log(error);
+            return;
+        }
+    }
+    static async createPost(req: Request, res: Response) {
+        try {
+            const user = await userHelpers.getUserFromToken(req);
+            const userId = user?._id.toString();
+            const { text, groupId } = req.body;
+
+            if (text) {
+                const post = { 
+                    text: text,
+                    date: moment(Date.now()).format('YYYY:MM:DD'),
+                    files: req.files ? (await fsHelpers.uploadFiles(req.files)).filelist : [],
+                    comments: [],
+                    likes: []
+                };
+                
+                const updatedGroup = await Group.findOneAndUpdate(
+                    { _id: new mongoose.Types.ObjectId(groupId), admin: userId },
+                    { 
+                        $push: { 
+                            posts: post
+                        } 
+                    },
+                    {
+                        returnDocument: "after"
+                    }
+                );
+
+                if (!updatedGroup) {
+                    res.status(400).json({ message: "Группа не найдена или вы не являетесь администратором данной группы" });
+                    return;
+                }
+                else {
+                    res.status(200).json({ message: "Вы успешно создали пост в группе" });
+                    return;
+                }
+            }
+            else {
+                res.status(400).json({ message: "Текст поста не может быть пустым" });
+                return;
+            }
+        }
+        catch (error) {
+            res.status(500).json({ message: "Ошибка при создании поста в группе" });
             console.log(error);
             return;
         }

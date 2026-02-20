@@ -22,6 +22,7 @@ class PostsController {
             await post.save();
             await User.updateOne({ _id: user?._id }, { $push: { posts: post._id } });
             res.status(200).json({ message: "Успешное создание поста", post: post });
+            return;
         }
         catch (error) {
             res.status(500).json({ message: "Ошибка при создании поста" });
