@@ -18,11 +18,11 @@ class UsersController {
         try {
             const filters = req.body;
             const users = await User.find(filters);
-            res.status(200).json({ message: "Успешное получение фильтрованного списка пользователей", users });
+            res.status(200).json({ message: "Успешное получение отфильтрованного списка пользователей", users });
             return;
         }
         catch (error) {
-            res.status(500).json({ message: "Ошибка получения фильтрованного списка пользователей", users: [] });
+            res.status(500).json({ message: "Ошибка получения отфильтрованного списка пользователей", users: [] });
             console.log(error);
             return;
         }
