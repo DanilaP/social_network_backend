@@ -302,7 +302,7 @@ class GroupsController {
             if (text) {
                 const post = { 
                     text: text,
-                    date: moment(Date.now()).format('YYYY:MM:DD'),
+                    date: moment(Date.now()).format('DD MMMM YYYY HH:mm'),
                     files: req.files ? (await fsHelpers.uploadFiles(req.files)).filelist : [],
                     comments: [],
                     likes: []
