@@ -244,7 +244,7 @@ class GroupsController {
             );
 
             if (!updatedGroup) {
-                res.status(500).json({ message: "Группа не найдена" });
+                res.status(400).json({ message: "Группа не найдена" });
                 return;
             }
             else {
@@ -254,6 +254,39 @@ class GroupsController {
         }
         catch (error) {
             res.status(500).json({ message: "Ошибка при выходе из группы" });
+            console.log(error);
+            return;
+        }
+    }
+    static async kickOutUserFromGroup(req: Request, res: Response) {
+        try {
+            const user = await userHelpers.getUserFromToken(req);
+            const userId = user?._id.toString();
+            const { groupId, memberId } = req.body;
+
+            const updatedGroup = await Group.findOneAndUpdate(
+                { _id: new mongoose.Types.ObjectId(groupId), admin: userId },
+                { 
+                    $pull: { 
+                        members: memberId
+                    } 
+                },
+                {
+                    returnDocument: "after"
+                }
+            );
+
+            if (!updatedGroup) {
+                res.status(400).json({ message: "Группа не найдена или вы не являетесь администратором данной группы" });
+                return;
+            }
+            else {
+                res.status(200).json({ message: "Вы успешно удалили пользователя из группы" });
+                return;
+            }
+        }
+        catch (error) {
+            res.status(500).json({ message: "Ошибка при удалении пользователя из группы" });
             console.log(error);
             return;
         }
