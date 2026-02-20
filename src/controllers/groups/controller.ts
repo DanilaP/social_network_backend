@@ -482,34 +482,11 @@ class GroupsController {
                     { 
                         _id: modifiedGroupId, 'posts._id': modifiedPostId
                     },
-                    [
-                        {
-                            $set: {
-                                posts: {
-                                    $map: {
-                                        input: "$posts",
-                                        as: "post",
-                                        in: {
-                                            $cond: {
-                                                if: { $eq: ["$$post._id", modifiedPostId] },
-                                                then: {
-                                                    $mergeObjects: [
-                                                        "$$post",
-                                                        {
-                                                            comments: {
-                                                                $concatArrays: ["$$post.comments", [comment]]
-                                                            }
-                                                        }
-                                                    ]
-                                                },
-                                                else: "$$post"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                    {
+                        $push: {
+                            'posts.$.comments': comment 
                         }
-                    ],
+                    },
                     {
                         returnDocument: "after"
                     }
@@ -551,38 +528,9 @@ class GroupsController {
                         admin: userId,
                         "posts._id": modifiedPostId
                     },
-                    [
-                        {
-                            $set: {
-                                posts: {
-                                    $map: {
-                                        input: "$posts",
-                                        as: "post",
-                                        in: {
-                                            $cond: {
-                                                if: { $eq: ["$$post._id", modifiedPostId] },
-                                                then: {
-                                                    $mergeObjects: [
-                                                        "$$post",
-                                                        {
-                                                            comments: {
-                                                                $filter: {
-                                                                    input: "$$post.comments",
-                                                                    as: "comment",
-                                                                    cond: { $ne: ["$$comment._id", modifiedCommentId] }
-                                                                }
-                                                            }
-                                                        }
-                                                    ]
-                                                },
-                                                else: "$$post"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    ],
+                    {
+                        $pull: { "posts.$.comments": { _id: modifiedCommentId } }
+                    },
                     {
                         returnDocument: "after"
                     }
