@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { broadcastMessage } from '../../websocket/websocket';
 import jwt, { JwtPayload } from "jsonwebtoken";
-import userHelpers from '../../helpers/user-helpers';
 import Dialogs from '../../models/dialogs/dialogs';
 import User from '../../models/user/user';
 import fsHelpers from '../../helpers/fs-helpers';
